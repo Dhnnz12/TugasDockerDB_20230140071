@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  app:
+    image: web-database:1.0
+    container_name: praktikum-web-database-20230140071
+    build: .
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env

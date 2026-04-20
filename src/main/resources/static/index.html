@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management System | Premium CRUD</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>User Management</h1>
+            <p>Kelola data mahasiswa dengan antarmuka modern dan responsif</p>
+        </header>
+
+        <!-- Form Section -->
+        <div class="glass-card">
+            <form id="userForm">
+                <input type="hidden" id="userId">
+                
+                <div class="form-section">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                        <div class="input-container">
+                            <label for="name">Nama Lengkap</label>
+                            <input type="text" id="name" placeholder="Contoh: John Doe" required>
+                        </div>
+                        <div class="input-container">
+                            <label for="nim">NIM (Nomor Induk Mahasiswa)</label>
+                            <input type="text" id="nim" placeholder="Contoh: 20230140071" required>
+                        </div>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button type="submit" id="submitBtn">
+                            <i data-lucide="user-plus" style="width:18px; height:18px"></i> Simpan User
+                        </button>
+                        <button type="button" class="secondary-btn" onclick="resetForm()">
+                            <i data-lucide="rotate-ccw" style="width:18px; height:18px"></i> Reset
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Table Section -->
+        <div class="glass-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2 style="font-size: 1.25rem; font-weight: 600;">List Mahasiswa</h2>
+                <div id="userCount" style="font-size: 0.9rem; color: var(--text-secondary)"></div>
+            </div>
+            
+            <div class="table-section">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>NAMA MAHASISWA</th>
+                            <th>NIM</th>
+                            <th style="text-align: right">AKSI</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTable">
+                        <!-- Data will be loaded here -->
+                        <tr>
+                            <td colspan="3" style="text-align: center; padding: 2rem; color: var(--text-secondary)">
+                                Memuat data...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="message"></div>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Main Logic -->
+    <script src="app.js"></script>
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>
