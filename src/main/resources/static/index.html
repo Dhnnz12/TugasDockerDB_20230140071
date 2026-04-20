@@ -1,234 +1,94 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>User CRUD</title>
-
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-    <style>
-        body {
-            font-family: Arial;
-            margin: 40px;
-        }
-        input, button {
-            padding: 8px;
-            margin: 5px 0;
-        }
-        table {
-            border-collapse: collapse;
-            margin-top: 20px;
-            width: 100%;
-        }
-        table, th, td {
-            border: 1px solid #ccc;
-            padding: 10px;
-        }
-        th {
-            background-color: #f4f4f4;
-        }
-        .delete-btn {
-            background-color: red;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        .edit-btn {
-            background-color: orange;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        .success {
-            color: green;
-        }
-        .error {
-            color: red;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management System | Premium CRUD</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h2>Form User</h2>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>User Management</h1>
+            <p>Kelola data mahasiswa dengan antarmuka modern dan responsif</p>
+        </header>
 
-<form id="userForm">
-    <!-- ID untuk update -->
-    <input type="hidden" id="userId">
+        <!-- Form Section -->
+        <div class="glass-card">
+            <form id="userForm">
+                <input type="hidden" id="userId">
+                
+                <div class="form-section">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                        <div class="input-container">
+                            <label for="name">Nama Lengkap</label>
+                            <input type="text" id="name" placeholder="Contoh: John Doe" required>
+                        </div>
+                        <div class="input-container">
+                            <label for="nim">NIM (Nomor Induk Mahasiswa)</label>
+                            <input type="text" id="nim" placeholder="Contoh: 20230140071" required>
+                        </div>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button type="submit" id="submitBtn">
+                            <i data-lucide="user-plus" style="width:18px; height:18px"></i> Simpan User
+                        </button>
+                        <button type="button" class="secondary-btn" onclick="resetForm()">
+                            <i data-lucide="rotate-ccw" style="width:18px; height:18px"></i> Reset
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
 
-    <input type="text" id="name" placeholder="Nama" required>
-    <input type="text" id="nim" placeholder="NIM" required>
-
-    <button type="submit">Simpan</button>
-    <button type="button" onclick="resetForm()">Reset</button>
-</form>
-
-<div id="message"></div>
-
-<h2>List User</h2>
-
-<table>
-    <thead>
-    <tr>
-        <th>Nama</th>
-        <th>NIM</th>
-        <th>Aksi</th>
-    </tr>
-    </thead>
-    <tbody id="userTable"></tbody>
-</table>
-
-<script>
-
-    const BASE_URL = "/api/users";
-
-    // ========================
-    // LOAD USERS
-    // ========================
-    function loadUsers() {
-        $.ajax({
-            url: BASE_URL,
-            type: "GET",
-            success: function (users) {
-                $("#userTable").empty();
-
-                users.forEach(function (user) {
-                    $("#userTable").append(`
+        <!-- Table Section -->
+        <div class="glass-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2 style="font-size: 1.25rem; font-weight: 600;">List Mahasiswa</h2>
+                <div id="userCount" style="font-size: 0.9rem; color: var(--text-secondary)"></div>
+            </div>
+            
+            <div class="table-section">
+                <table>
+                    <thead>
                         <tr>
-                            <td>${user.name}</td>
-                            <td>${user.nim}</td>
-                            <td>
-                                <button class="edit-btn"
-                                    onclick="editUser('${user.id}', '${user.name}', '${user.nim}')">
-                                    Edit
-                                </button>
-
-                                <button class="delete-btn"
-                                    onclick="deleteUser('${user.id}')">
-                                    Delete
-                                </button>
+                            <th>NAMA MAHASISWA</th>
+                            <th>NIM</th>
+                            <th style="text-align: right">AKSI</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTable">
+                        <!-- Data will be loaded here -->
+                        <tr>
+                            <td colspan="3" style="text-align: center; padding: 2rem; color: var(--text-secondary)">
+                                Memuat data...
                             </td>
                         </tr>
-                    `);
-                });
-            },
-            error: function (xhr) {
-                console.log(xhr);
-            }
-        });
-    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
-    // ========================
-    // ADD / UPDATE USER
-    // ========================
-    $("#userForm").submit(function (e) {
-        e.preventDefault();
+    <!-- Notification Toast -->
+    <div id="message"></div>
 
-        const id = $("#userId").val();
-
-        const userData = {
-            name: $("#name").val(),
-            nim: $("#nim").val()
-        };
-
-        // ========================
-        // UPDATE
-        // ========================
-        if (id) {
-            $.ajax({
-                url: BASE_URL + "/" + id,
-                type: "PUT",
-                contentType: "application/json",
-                data: JSON.stringify(userData),
-
-                success: function () {
-                    $("#message").html("✏️ User berhasil diupdate").attr("class", "success");
-                    resetForm();
-                    loadUsers();
-                },
-
-                error: function (xhr) {
-                    console.log(xhr);
-                    $("#message").html("❌ Gagal update user").attr("class", "error");
-                }
-            });
-        }
-
-        // ========================
-        // CREATE
-        // ========================
-        else {
-            $.ajax({
-                url: BASE_URL,
-                type: "POST",
-                contentType: "application/json",
-                data: JSON.stringify(userData),
-
-                success: function () {
-                    $("#message").html("✅ User berhasil ditambahkan").attr("class", "success");
-                    resetForm();
-                    loadUsers();
-                },
-
-                error: function (xhr) {
-                    console.log(xhr);
-                    $("#message").html("❌ Error: " + xhr.responseText).attr("class", "error");
-                }
-            });
-        }
-    });
-
-    // ========================
-    // EDIT USER
-    // ========================
-    function editUser(id, name, nim) {
-        $("#userId").val(id);
-        $("#name").val(name);
-        $("#nim").val(nim);
-
-        $("#message").html("✏️ Mode edit aktif").attr("class", "success");
-    }
-
-    // ========================
-    // DELETE USER
-    // ========================
-    function deleteUser(id) {
-        if (!confirm("Yakin ingin hapus user?")) return;
-
-        $.ajax({
-            url: BASE_URL + "/" + id,
-            type: "DELETE",
-
-            success: function () {
-                $("#message").html("🗑️ User berhasil dihapus").attr("class", "success");
-                loadUsers();
-            },
-
-            error: function (xhr) {
-                console.log(xhr);
-                $("#message").html("❌ Gagal hapus user").attr("class", "error");
-            }
-        });
-    }
-
-    // ========================
-    // RESET FORM
-    // ========================
-    function resetForm() {
-        $("#userId").val("");
-        $("#name").val("");
-        $("#nim").val("");
-
-        $("#message").html("");
-    }
-
-    // ========================
-    // INIT LOAD
-    // ========================
-    $(document).ready(function () {
-        loadUsers();
-    });
-
-</script>
-
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Main Logic -->
+    <script src="app.js"></script>
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+    </script>
 </body>
 </html>
