@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User CRUD</title>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial;
+            margin: 40px;
+        }
+        input, button {
+            padding: 8px;
+            margin: 5px 0;
+        }
+        table {
+            border-collapse: collapse;
+            margin-top: 20px;
+            width: 100%;
+        }
+        table, th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        .delete-btn {
+            background-color: red;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .edit-btn {
+            background-color: orange;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Form User</h2>
+
+<form id="userForm">
+    <!-- ID untuk update -->
+    <input type="hidden" id="userId">
+
+    <input type="text" id="name" placeholder="Nama" required>
+    <input type="text" id="nim" placeholder="NIM" required>
+
+    <button type="submit">Simpan</button>
+    <button type="button" onclick="resetForm()">Reset</button>
+</form>
+
+<div id="message"></div>
+
+<h2>List User</h2>
+
+<table>
+    <thead>
+    <tr>
+        <th>Nama</th>
+        <th>NIM</th>
+        <th>Aksi</th>
+    </tr>
+    </thead>
+    <tbody id="userTable"></tbody>
+</table>
+
+<script>
+
+    const BASE_URL = "/api/users";
+
+    // ========================
+    // LOAD USERS
+    // ========================
+    function loadUsers() {
+        $.ajax({
+            url: BASE_URL,
+            type: "GET",
+            success: function (users) {
+                $("#userTable").empty();
+
+                users.forEach(function (user) {
+                    $("#userTable").append(`
+                        <tr>
+                            <td>${user.name}</td>
+                            <td>${user.nim}</td>
+                            <td>
+                                <button class="edit-btn"
+                                    onclick="editUser('${user.id}', '${user.name}', '${user.nim}')">
+                                    Edit
+                                </button>
+
+                                <button class="delete-btn"
+                                    onclick="deleteUser('${user.id}')">
+                                    Delete
+                                </button>
+                            </td>
+                        </tr>
+                    `);
+                });
+            },
+            error: function (xhr) {
+                console.log(xhr);
+            }
+        });
+    }
+
+    // ========================
+    // ADD / UPDATE USER
+    // ========================
+    $("#userForm").submit(function (e) {
+        e.preventDefault();
+
+        const id = $("#userId").val();
+
+        const userData = {
+            name: $("#name").val(),
+            nim: $("#nim").val()
+        };
+
+        // ========================
+        // UPDATE
+        // ========================
+        if (id) {
+            $.ajax({
+                url: BASE_URL + "/" + id,
+                type: "PUT",
+                contentType: "application/json",
+                data: JSON.stringify(userData),
+
+                success: function () {
+                    $("#message").html("✏️ User berhasil diupdate").attr("class", "success");
+                    resetForm();
+                    loadUsers();
+                },
+
+                error: function (xhr) {
+                    console.log(xhr);
+                    $("#message").html("❌ Gagal update user").attr("class", "error");
+                }
+            });
+        }
+
+        // ========================
+        // CREATE
+        // ========================
+        else {
+            $.ajax({
+                url: BASE_URL,
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(userData),
+
+                success: function () {
+                    $("#message").html("✅ User berhasil ditambahkan").attr("class", "success");
+                    resetForm();
+                    loadUsers();
+                },
+
+                error: function (xhr) {
+                    console.log(xhr);
+                    $("#message").html("❌ Error: " + xhr.responseText).attr("class", "error");
+                }
+            });
+        }
+    });
+
+    // ========================
+    // EDIT USER
+    // ========================
+    function editUser(id, name, nim) {
+        $("#userId").val(id);
+        $("#name").val(name);
+        $("#nim").val(nim);
+
+        $("#message").html("✏️ Mode edit aktif").attr("class", "success");
+    }
+
+    // ========================
+    // DELETE USER
+    // ========================
+    function deleteUser(id) {
+        if (!confirm("Yakin ingin hapus user?")) return;
+
+        $.ajax({
+            url: BASE_URL + "/" + id,
+            type: "DELETE",
+
+            success: function () {
+                $("#message").html("🗑️ User berhasil dihapus").attr("class", "success");
+                loadUsers();
+            },
+
+            error: function (xhr) {
+                console.log(xhr);
+                $("#message").html("❌ Gagal hapus user").attr("class", "error");
+            }
+        });
+    }
+
+    // ========================
+    // RESET FORM
+    // ========================
+    function resetForm() {
+        $("#userId").val("");
+        $("#name").val("");
+        $("#nim").val("");
+
+        $("#message").html("");
+    }
+
+    // ========================
+    // INIT LOAD
+    // ========================
+    $(document).ready(function () {
+        loadUsers();
+    });
+
+</script>
+
+</body>
+</html>
